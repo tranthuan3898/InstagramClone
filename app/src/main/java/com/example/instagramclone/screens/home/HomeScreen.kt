@@ -1,7 +1,8 @@
 package com.example.instagramclone
 
 
-import android.media.Image
+//import android.media.Image
+import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -10,19 +11,28 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.BottomNavigation
+import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
+import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
+import coil.size.Size
+import com.example.instagramclone.data.Post
+import com.example.instagramclone.data.Story
 
 
 @Composable
@@ -38,20 +48,30 @@ fun HomeScreen() {
 fun HomeScreenPreview() {
     Column(
         modifier = Modifier
-            .fillMaxSize(),
+            .fillMaxSize()
+            .background(Color.White),
         verticalArrangement = Arrangement.SpaceBetween,
-//        .background(color = Color.White)
     ) {
-        MainSection()
-        NavigationSection()
+//        MainSection()
+        Test()
     }
 }
 
 @Composable
-private fun MainSection() {
-    Column() {
-        HeaderSection()
-        StorySection()
+fun Test() {
+    Scaffold(
+        topBar = {
+            TopAppBar(backgroundColor = Color.White) {
+                HeaderSection()
+            }
+        },
+        bottomBar = {
+            BottomNavigation(backgroundColor = Color.White) {
+                NavigationSection()
+            }
+        })
+    {
+        StorySection(it)
         PostSection()
     }
 }
@@ -68,9 +88,6 @@ private fun Logo() {
 private fun HeaderSection() {
     Row(
         modifier = Modifier
-            .background(
-                color = Color.Green
-            )
             .fillMaxWidth()
             .height(30.dp),
         horizontalArrangement = Arrangement.SpaceBetween
@@ -87,9 +104,9 @@ private fun HeaderSection() {
             )
             Image(
                 modifier = Modifier.size(30.dp),
-                painter = painterResource(id = R.drawable.ic_favorite),
+                painter = painterResource(id = R.drawable.ic_like),
                 contentDescription = stringResource(
-                    id = R.string.ic_favorite
+                    id = R.string.ic_like
                 )
             )
 
@@ -113,7 +130,6 @@ private fun HeaderSection() {
 fun NavigationSection() {
     Row(
         modifier = Modifier
-            .background(Color.White)
             .border(1.dp, Color.Gray)
             .fillMaxWidth()
             .padding(0.dp, 10.dp),
@@ -123,21 +139,21 @@ fun NavigationSection() {
         Image(
             modifier = Modifier.size(30.dp),
             painter = painterResource(id = R.drawable.ic_home),
-            contentDescription = "home"
+            contentDescription = stringResource(id = R.string.ic_home)
         )
         Image(
             modifier = Modifier.size(30.dp),
             painter = painterResource(id = R.drawable.ic_search),
-            contentDescription = "search"
+            contentDescription = stringResource(id = R.string.ic_search)
         )
         Image(
             modifier = Modifier.size(30.dp),
             painter = painterResource(id = R.drawable.ic_save),
-            contentDescription = "save"
+            contentDescription = stringResource(id = R.string.ic_save)
         )
         Image(
-            painter = painterResource(id = R.drawable.ic_profile),
-            contentDescription = "avatar",
+            painter = painterResource(id = R.drawable.profile1),
+            contentDescription = stringResource(id = R.string.profile1),
             contentScale = ContentScale.Crop,                      //cắt hình ảnh nếu ko phải hình vuông
             modifier = Modifier
                 .size(30.dp)
@@ -149,10 +165,11 @@ fun NavigationSection() {
 
 
 @Composable
-fun StorySection() {
+fun StorySection(paddingValues: PaddingValues) {
 
 }
 
+@SuppressLint("ResourceType")
 @Composable
 fun PostSection() {
     LazyColumn() {
@@ -164,6 +181,13 @@ fun PostSection() {
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
                     ) {
+
+                        val painter = rememberAsyncImagePainter(
+                            model = ImageRequest.Builder(LocalContext.current)
+                                .data(item.image)
+                                .size(Size.ORIGINAL) // Set the target size to load the image at.
+                                .build()
+                        )
 
                         // cho nay modifier bi loi, copy code
                         Image(
@@ -181,10 +205,10 @@ fun PostSection() {
                                     CircleShape
                                 ),
 
-                            painter = painterResource(id = item.profile),
+                            painter = painter,
                             contentDescription = null
                         )
-                        Text(text = item.name, style = TextStyle(color = Color.Black))
+                        Text(text = item.text, style = TextStyle(color = Color.Black))
 
 
                     }
@@ -211,7 +235,7 @@ fun PostSection() {
                                 .clip(CircleShape)
                                 .border(1.dp, Color.Red),
                             painter = painterResource(id = item.profile),
-                            contentDescription = "profile"
+                            contentDescription = stringResource(id = R.string.profile1)
                         )
                         Spacer(modifier = Modifier.width(10.dp))
                         Text(text = item.name, style = TextStyle(fontWeight = FontWeight.Medium))
@@ -220,28 +244,63 @@ fun PostSection() {
                         modifier = Modifier.width(25.dp),
                         contentScale = ContentScale.FillWidth,
                         painter = painterResource(id = R.drawable.ic_share),
-                        contentDescription = "share"
+                        contentDescription = stringResource(id = R.string.ic_share)
                     )
                 }
+                Spacer(modifier = Modifier.height(5.dp))
+
+                Image(painter = painterResource(id = item.image), contentDescription = null)
+
+                Row(
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(10.dp),
+                ) {
+
+                    Row() {
+                        Image(
+                            modifier = Modifier.width(25.dp),
+                            contentScale = ContentScale.FillWidth,
+                            painter = painterResource(id = R.drawable.ic_like),
+                            contentDescription = stringResource(id = R.string.ic_like)
+                        )
+                        Image(
+                            modifier = Modifier.width(25.dp),
+                            contentScale = ContentScale.FillWidth,
+                            painter = painterResource(id = R.drawable.ic_comment),
+                            contentDescription = stringResource(id = R.string.ic_comment)
+                        )
+                        Image(
+                            modifier = Modifier.width(25.dp),
+                            contentScale = ContentScale.FillWidth,
+                            painter = painterResource(id = R.drawable.ic_share),
+                            contentDescription = stringResource(id = R.string.ic_share)
+                        )
+                    }
+
+                }
+
             }
+        }
+
+        item {
+
         }
     }
 }
 
-data class Post(val name: String, val profile: Int, val image: Int)
 
 var postList = mutableListOf(
     Post("Raj Sing", R.drawable.profile1, image = R.drawable.post1),
     Post("Jonu", R.drawable.profile2, image = R.drawable.post2),
 )
 
-data class Story(val name: String, val profile: Int);
 var storyList = mutableListOf(
-    Story("Your Story", R.drawable.profile1),
-    Story("Sơn Tùng", R.drawable.profile2),
-    Story("Sobbin", R.drawable.profile3),
-    Story("Mono", R.drawable.profile4),
-    Story("Đạt G", R.drawable.profile5),
-    Story("Low G", R.drawable.profile6),
+    Story(image = "https://via.placeholder.com/200", "Your Story"),
+    Story(image = "https://via.placeholder.com/200", "Sơn Tùng"),
+    Story(image = "https://via.placeholder.com/200", "Sobbin"),
+    Story(image = "https://via.placeholder.com/200", "Mono"),
+    Story(image = "https://via.placeholder.com/200", "Đạt G"),
+    Story(image = "https://via.placeholder.com/200", "Low G"),
 )
 
