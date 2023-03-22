@@ -9,13 +9,19 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
 @Composable
 fun SignUpScreen() {
-    Column(modifier = Modifier.fillMaxSize()) {
-
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 50.dp),
+        verticalArrangement = Arrangement.Center
+    ) {
+        SignUpSection()
     }
 }
 
@@ -68,14 +74,16 @@ fun SignUpSection() {
         value = password,
         onValueChange = { password = it },
         modifier = Modifier.fillMaxWidth(),
+        visualTransformation = PasswordVisualTransformation(),
         label = {
-            Text(text = "Mật khẩu")
+            Text(text = "Mật khẩu",)
         }
     )
     TextField(
         value = confirmPassword,
         onValueChange = { confirmPassword = it },
         modifier = Modifier.fillMaxWidth(),
+        visualTransformation = PasswordVisualTransformation(),
         label = {
             Text(text = "Nhập lại mật khẩu")
         }
