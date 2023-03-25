@@ -3,6 +3,7 @@ package com.example.instagramclone
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Button
+import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.runtime.*
@@ -61,6 +62,8 @@ fun SignUpSection() {
 
     Logo()
 
+
+
     TextField(
         value = username,
         onValueChange = { username = it },
@@ -68,8 +71,8 @@ fun SignUpSection() {
         label = {
             Text("Tên đăng nhập")
         }
-
     )
+
     TextField(
         value = password,
         onValueChange = { password = it },
