@@ -22,11 +22,25 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.instagramclone.screens.login.LoginViewModel
+import kotlinx.coroutines.launch
 
 @Composable
-fun LoginScreen() {
-    Column(modifier = Modifier.fillMaxSize()) {
-        Logo()
+fun LoginScreen(
+    onClickLogin: () -> Unit
+) {
+
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize(),
+//            .padding(horizontal = 50.dp),
+        verticalArrangement = Arrangement.SpaceBetween,
+        horizontalAlignment = Alignment.CenterHorizontally
+
+    ) {
+//        HeaderSection()
+        LoginSection(onClickLogin)
     }
 }
 
@@ -35,27 +49,28 @@ fun LoginScreen() {
 fun LoginScreenPreview() {
     Column(
         modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 50.dp),
+            .fillMaxSize(),
+//            .padding(horizontal = 50.dp),
         verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.CenterHorizontally
 
     ) {
-        HeaderSection()
-        LoginSection()
-        FooterSection()
+//        HeaderSection()
+        LoginSection(onClickLogin = {})
     }
 }
 
-
-@Composable
-private fun HeaderSection () {
-    Row() {
-        Image(painter = painterResource(id = R.drawable.ic_back), contentDescription = stringResource(
-            id = R.string.back_icon
-        ))
-    }
-}
+//
+//@Composable
+//private fun HeaderSection() {
+//    Row() {
+//        Image(
+//            painter = painterResource(id = R.drawable.ic_back), contentDescription = stringResource(
+//                id = R.string.back_icon
+//            )
+//        )
+//    }
+//}
 
 @Composable
 private fun Logo() {
@@ -66,66 +81,109 @@ private fun Logo() {
 }
 
 @Composable
-fun LoginSection() {
+fun LoginSection(onClickLogin: () -> Unit) {
 
     var username by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
 
-    Column(verticalArrangement = Arrangement.Top) {
+    val viewModel = LoginViewModel()
+    val uiState by viewModel.uiState
+    val scaffoldState = rememberScaffoldState() // this contains the `SnackbarHostState`
+    val coroutineScope = rememberCoroutineScope()
 
-        Logo()
-
-        TextField(
-            value = username,
-            onValueChange = { username = it },
-            label = {
-                Text(
-                    text = "Số điện thoại, tên người dùng hoặc email",
-                    fontSize = 13.sp
-                )
-            },
-            modifier = Modifier.fillMaxWidth(),
-        )
-
-        TextField(
-            value = password,
-            onValueChange = { password = it },
-            label = { Text(text = "Mật khẩu", fontSize = 13.sp) },
-            visualTransformation = PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.size(5.dp))
-
-        Text(
-            text = "Quên mật khẩu?",
-            modifier = Modifier.fillMaxWidth(),
-            textAlign = TextAlign.End,
-            fontWeight = FontWeight.Bold
-        )
-
-        Button(
-            onClick = { /*TODO*/ },
-            colors = ButtonDefaults.buttonColors(backgroundColor = Color.Blue),
-            modifier = Modifier.fillMaxWidth()
+    Scaffold(
+        scaffoldState = scaffoldState,
+    ) {
+        Column(
+            modifier = Modifier.padding(it),
+            verticalArrangement = Arrangement.Center
         ) {
-            Text(
-                text = "Đăng nhập",
-                color = Color.White
+            if (uiState.error.isNotEmpty()) {
+                LaunchedEffect(scaffoldState.snackbarHostState) {
+                    coroutineScope.launch {
+                        val result = scaffoldState.snackbarHostState.showSnackbar(
+                            message = uiState.error
+                        )
+                        when (result) {
+                            SnackbarResult.Dismissed -> viewModel.clearError()
+                            else -> {}
+                        }
+                    }
+                }
+            }
+
+            Logo()
+
+            TextField(
+                value = uiState.email,
+                onValueChange = viewModel::onEmailChange,
+                label = {
+                    Text(
+                        text = "Số điện thoại, tên người dùng hoặc email",
+                        fontSize = 13.sp
+                    )
+                },
+                modifier = Modifier.fillMaxWidth(),
             )
+
+            TextField(
+                value = uiState.password,
+                onValueChange = viewModel::onPasswordChange,
+                label = {
+                    Text(
+                        text = "Mật khẩu",
+                        fontSize = 13.sp
+                    )
+                },
+                visualTransformation = PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.size(5.dp))
+
+            Text(
+                text = "Quên mật khẩu?",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(5.dp),
+                textAlign = TextAlign.End,
+                fontWeight = FontWeight.Bold
+            )
+
+            Button(
+                onClick = {
+                    viewModel.onSignInClick {
+                        onClickLogin()
+                    }
+                },
+                colors = ButtonDefaults.buttonColors(backgroundColor = Color.Blue),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = "Đăng nhập",
+                    color = Color.White
+                )
+            }
+
+            Spacer(modifier = Modifier.size(5.dp))
+
+            Text(
+                buildAnnotatedString {
+                    withStyle(SpanStyle(color = Color.Black)) {
+                        append("Bạn chưa có tài khoản?")
+                    }
+                    withStyle(SpanStyle(color = Color.Blue)) {
+                        append(" Đăng ký.")
+                    }
+                }, modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(5.dp),
+                textAlign = TextAlign.Center
+            )
+
         }
     }
-}
 
-@Composable
-fun FooterSection() {
-    Text(buildAnnotatedString {
-        withStyle(SpanStyle(color = Color.White)) {
-            append("Bạn chưa có tài khoản ư?")
-        }
-        withStyle(SpanStyle(color = Color.Blue)) {
-            append(" Đăng ký.")
-        }
-    })
+
 }
