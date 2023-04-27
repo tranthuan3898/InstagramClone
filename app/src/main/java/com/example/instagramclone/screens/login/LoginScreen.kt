@@ -1,8 +1,8 @@
 package com.example.instagramclone
 
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.runtime.*
@@ -22,15 +22,14 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.example.instagramclone.screens.login.LoginViewModel
 import kotlinx.coroutines.launch
 
 @Composable
 fun LoginScreen(
-    onClickLogin: () -> Unit
+    navController: NavController
 ) {
-
-
     Column(
         modifier = Modifier
             .fillMaxSize(),
@@ -40,7 +39,7 @@ fun LoginScreen(
 
     ) {
 //        HeaderSection()
-        LoginSection(onClickLogin)
+        LoginSection(navController)
     }
 }
 
@@ -56,11 +55,10 @@ fun LoginScreenPreview() {
 
     ) {
 //        HeaderSection()
-        LoginSection(onClickLogin = {})
+//        LoginSection(navController)
     }
 }
 
-//
 //@Composable
 //private fun HeaderSection() {
 //    Row() {
@@ -81,7 +79,7 @@ private fun Logo() {
 }
 
 @Composable
-fun LoginSection(onClickLogin: () -> Unit) {
+fun LoginSection(navController: NavController) {
 
     var username by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
@@ -153,9 +151,11 @@ fun LoginSection(onClickLogin: () -> Unit) {
 
             Button(
                 onClick = {
-                    viewModel.onSignInClick {
-                        onClickLogin()
-                    }
+                    viewModel.onSignInClick(
+                        onClickSuccess = {
+                            navController.navigate("main")
+                        }
+                    )
                 },
                 colors = ButtonDefaults.buttonColors(backgroundColor = Color.Blue),
                 modifier = Modifier.fillMaxWidth()
@@ -168,7 +168,7 @@ fun LoginSection(onClickLogin: () -> Unit) {
 
             Spacer(modifier = Modifier.size(5.dp))
 
-            Text(
+            ClickableText(
                 buildAnnotatedString {
                     withStyle(SpanStyle(color = Color.Black)) {
                         append("Bạn chưa có tài khoản?")
@@ -176,10 +176,13 @@ fun LoginSection(onClickLogin: () -> Unit) {
                     withStyle(SpanStyle(color = Color.Blue)) {
                         append(" Đăng ký.")
                     }
-                }, modifier = Modifier
+                },
+                modifier = Modifier
                     .fillMaxWidth()
                     .padding(5.dp),
-                textAlign = TextAlign.Center
+                onClick = {
+                    navController.navigate("signup")
+                }
             )
 
         }
