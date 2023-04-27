@@ -1,5 +1,8 @@
 package com.example.instagramclone.data
 
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.Dp
+
 
 data class User(
     val username: String,
