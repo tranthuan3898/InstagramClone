@@ -2,10 +2,7 @@ package com.example.instagramclone
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Button
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Text
-import androidx.compose.material.TextField
+import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -13,6 +10,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.instagramclone.screens.singup.SignUpViewModel
+import kotlinx.coroutines.launch
 
 @Composable
 fun SignUpScreen() {
@@ -60,41 +59,68 @@ fun SignUpSection() {
         mutableStateOf("")
     }
 
-    Logo()
+    val viewModel = SignUpViewModel()
+    val uiState by viewModel.uiState
+    val scaffoldState = rememberScaffoldState() // this contains the `SnackbarHostState`
+    val coroutineScope = rememberCoroutineScope()
 
+    Scaffold(
+        scaffoldState = scaffoldState,
+    ) {
+        Column(
+            modifier = Modifier.padding(it),
+            verticalArrangement = Arrangement.Center
+        ) {
+            if (uiState.error.isNotEmpty()) {
+                LaunchedEffect(scaffoldState.snackbarHostState) {
+                    coroutineScope.launch {
+                        val result = scaffoldState.snackbarHostState.showSnackbar(
+                            message = uiState.error
+                        )
+                        when (result) {
+                            SnackbarResult.Dismissed -> viewModel.clearError()
+                            else -> {}
+                        }
+                    }
+                }
+            }
 
+            Logo()
 
-    TextField(
-        value = username,
-        onValueChange = { username = it },
-        modifier = Modifier.fillMaxWidth(),
-        label = {
-            Text("Tên đăng nhập")
+            TextField(
+                value = uiState.email,
+                onValueChange = viewModel::onEmailChange,
+                modifier = Modifier.fillMaxWidth(),
+                label = {
+                    Text("Email")
+                }
+            )
+
+            TextField(
+                value = uiState.password,
+                onValueChange = viewModel::onPasswordChange,
+                modifier = Modifier.fillMaxWidth(),
+                visualTransformation = PasswordVisualTransformation(),
+                label = {
+                    Text(text = "Mật khẩu",)
+                }
+            )
+            TextField(
+                value = uiState.confirmPassword,
+                onValueChange = viewModel::onConfirmPasswordChange,
+                modifier = Modifier.fillMaxWidth(),
+                visualTransformation = PasswordVisualTransformation(),
+                label = {
+                    Text(text = "Nhập lại mật khẩu")
+                }
+            )
+            Button(onClick = {
+                viewModel.onSignUpClick {
+                    //
+                }
+            }, modifier = Modifier.fillMaxWidth()) {
+                Text(text = "Đăng ký")
+            }
         }
-    )
-
-    TextField(
-        value = password,
-        onValueChange = { password = it },
-        modifier = Modifier.fillMaxWidth(),
-        visualTransformation = PasswordVisualTransformation(),
-        label = {
-            Text(text = "Mật khẩu",)
-        }
-    )
-    TextField(
-        value = confirmPassword,
-        onValueChange = { confirmPassword = it },
-        modifier = Modifier.fillMaxWidth(),
-        visualTransformation = PasswordVisualTransformation(),
-        label = {
-            Text(text = "Nhập lại mật khẩu")
-        }
-    )
-    Button(onClick = {
-        //your onclick code here
-    }, modifier = Modifier.fillMaxWidth()) {
-        Text(text = "Đăng ký")
     }
-
 }
